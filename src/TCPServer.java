@@ -1,13 +1,9 @@
-import javax.print.attribute.standard.Severity;
 import java.util.*;
 import java.io.*;
 import java.net.*;
-import java.util.stream.Collectors;
 
 public class TCPServer
 {
-    static Random rnd = new Random();
-
     public static void main(String[] args)
     // hard code in port number if necessary
     // args = new String [] {"30121"};
@@ -27,24 +23,31 @@ public class TCPServer
                 BufferedReader requestReader1 = new BufferedReader(new InputStreamReader(clientSocket1.getInputStream()));
         )
         {
-            ShuffleMessage message = new ShuffleMessage("Rocki Taub");
+            ShuffleMessage message = new ShuffleMessage("My name is Rachel Taub. I am a computer science major in Touro LCW.");
             List<String>origList = message.setOriginalMessage();
             List<String>shuffList = message.shuffle();
             List<Integer>serverPackets = message.setPacketNumbers(shuffList, origList);
-            int numPackets = message.setNumPackets(serverPackets);
+            message.setNumPackets(serverPackets);
             message.randomizedSend(responseWriter1, shuffList, serverPackets);
 
-            String usersRequest;
-            List<Integer>missingPackets = new ArrayList<>();
-            while ((usersRequest = requestReader1.readLine()) != null)
+            String usersRequest = "<>";
+
+            while (((usersRequest = requestReader1.readLine()) != null) && (!usersRequest.equals("Done")))
             {
+
+
+
                 boolean isNum = isNumeric(usersRequest);
+
+                int missingPackNum = 0;
                 if (isNum)
                 {
-                    missingPackets.add(Integer.parseInt(usersRequest));
+                     missingPackNum = (Integer.parseInt(usersRequest));
                 }
+                System.out.println("SERVER RESPONDS: \"" + usersRequest + "\"");
+
+                message.resendSinglePacket(responseWriter1, missingPackNum, serverPackets, shuffList);
             }
-            message.resendPackets(responseWriter1, missingPackets, serverPackets, shuffList);
         }
         catch (IOException exc1)
         {
@@ -62,7 +65,7 @@ public class TCPServer
         }
         try
         {
-            int num = Integer.parseInt(response);
+            Integer.parseInt(response);
         }
         catch (NumberFormatException exc)
         {

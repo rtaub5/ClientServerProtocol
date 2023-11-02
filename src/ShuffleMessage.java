@@ -27,11 +27,17 @@ public class ShuffleMessage
         List<Integer>packets = new ArrayList<Integer>();
         for (int ix = 0; ix < shuffledMessageList.size(); ++ix)
         {
-            for (int jx = 0; jx < originalMessageList.size(); ++jx)
+            label:
+           for (int jx = 0; jx < originalMessageList.size(); ++jx)
             {
                 if ((shuffledMessageList.get(ix).equals(originalMessageList.get(jx))))
                 {
-                    packets.add(jx);
+                    if (!packets.contains(jx))
+                    {
+                        packets.add(jx);
+                        break label;
+                    }
+
                 }
             }
         }
@@ -60,24 +66,33 @@ public class ShuffleMessage
         writer1.println("Done");
     }
 
-    public void resendPackets(PrintWriter writer1, List<Integer> missingPackets, List<Integer>packets, List<String>shuffledMessageList)
+
+    public void resendSinglePacket(PrintWriter writer1, int missingPacket, List<Integer>serverPackets, List<String> shuffledMessageList)
     {
         Random rand = new Random();
-        int prob = rand.nextInt(101);
-        for (int ix = 0; ix < missingPackets.size(); ++ix)
-        {
-            for (int jx = 0; jx < packets.size(); ++jx)
-            {
-                if (missingPackets.get(ix) == packets.get(jx))
-                {
-                    if ((prob > 20) || (packets.get(ix) == (packets.size() - 1)))
-                    {
-                        writer1.println(shuffledMessageList.get(ix));
-                        writer1.println(packets.get(ix));
-                    }
-                }
-            }
 
-        }
+         System.out.println("missing packet " + missingPacket);
+             int prob = rand.nextInt(101);
+            for (int jx = 0; jx < serverPackets.size(); ++jx)
+            {
+                if (missingPacket == serverPackets.get(jx))
+                {
+                    if ((prob > 20) || (serverPackets.get(jx) == (serverPackets.size() - 1)))
+                      {
+
+                    writer1.println(shuffledMessageList.get(jx));
+                    System.out.println("Resending letter: " + shuffledMessageList.get(jx));
+                    writer1.println(missingPacket);
+                    System.out.println("Resending packet " + missingPacket);
+
+                     }
+
+                }
+
+            }
+        writer1.println("Done");
+
+
     }
+
 }

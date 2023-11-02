@@ -9,22 +9,31 @@ public class UnscrambleMessage
         message = m;
         packets = p;
     }
+    public void setMessage(List<String> m)
+    {
+        message = m;
+    }
+    public List<String> getMessage()
+    {
+        return message;
+    }
+
+    public void setPackets(List<Integer>p)
+    {
+        packets = p;
+    }
+    public List<Integer> getPackets()
+    {
+        return packets;
+    }
 
     public List<Integer> checkPackets()
     {
         List<Integer> verifiedPackets = new ArrayList<>();
         List<Integer> missingPackets = new ArrayList<>();
-        int element = 0;
         for (int ix = 0; ix < packets.size(); ++ix)
         {
-            for (int jx = 0; jx < packets.size(); ++jx)
-            {
-                if (packets.get(ix) == element)
-                {
-                    verifiedPackets.add(element);
-                }
-                element++;
-            }
+           verifiedPackets.add(packets.get(ix));
         }
         int maximum = Collections.max(verifiedPackets);
         for (int ix = 0; ix <= maximum; ++ix)
@@ -35,23 +44,13 @@ public class UnscrambleMessage
                 missingPackets.add(ix);
             }
         }
+
         return missingPackets;
     }
-
-    public void addMissingPackets(List<String> missingLetters, List<Integer> missingNums)
-    {
-        for (int ix = 0; ix < missingLetters.size(); ++ix)
-        {
-            message.add(missingLetters.get(ix));
-            packets.add(missingNums.get(ix));
-        }
-    }
-
     public String unscramble()
     {
         int maximumNum = Collections.max(packets);
         char [] unscrambledMessage = new char [(maximumNum + 1)];
-        int element = 0;
         char num = '0';
         for (int ix = 0; ix <= maximumNum; ++ix)
         {
@@ -59,12 +58,19 @@ public class UnscrambleMessage
             {
                 if (packets.get(jx) == ix)
                 {
-                    num = message.get(ix).charAt(0);
+                    num = message.get(jx).charAt(0);
                 }
             }
             unscrambledMessage[ix] = num;
         }
-    return unscrambledMessage.toString();
+    return String.valueOf(unscrambledMessage);
     }
+
+    public String toString()
+    {
+        String unscrambString = "Message: " + message.toString() + "packets: " + packets.toString();
+        return unscrambString;
+    }
+
 
 }

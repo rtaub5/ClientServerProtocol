@@ -31,10 +31,8 @@ public class SimpleClient {
 			String serverResponse = "<>";
             List<Integer> numPackets = new ArrayList<Integer>();
             List<String> message = new ArrayList<>();
-            while (!serverResponse.equals("Done"))
+            while ((stdIn.readLine() != null) && (!serverResponse.equals("Done")))
             {
-
-               requestWriter.println(stdIn.readLine());
 
                   serverResponse = responseReader.readLine();
                   boolean isNum = isNumeric(serverResponse);
@@ -42,46 +40,77 @@ public class SimpleClient {
                   {
                       numPackets.add(Integer.parseInt(serverResponse));
                   }
-                  else
+                  else if (!serverResponse.equals("Done"))
                   {
                       message.add(serverResponse);
                   }
                 System.out.println("SERVER RESPONDS: \"" + serverResponse + "\"");
 
             }
+
             UnscrambleMessage unscrambleMessage = new UnscrambleMessage(message, numPackets);
             List<Integer>missingPackets = unscrambleMessage.checkPackets();
-            if (!missingPackets.isEmpty())
+            boolean isMissPacketsEmpty = missingPackets.isEmpty();
+            while (!isMissPacketsEmpty)
             {
                 for (int ix = 0; ix < missingPackets.size(); ++ix)
                 {
-                    System.out.println("missingpacket " + missingPackets.get(ix));
+
+                    String mPack = missingPackets.get(ix).toString();
+                    requestWriter.println(mPack);
+                    boolean done = false;
+
+                    while ((!done))
+                    {
+
+                        serverResponse = responseReader.readLine();
+                        boolean isNum = isNumeric(serverResponse);
+
+                        if (isNum)
+                        {
+                            int resentNum = Integer.parseInt(serverResponse);
+                            if (missingPackets.contains(resentNum))
+                             numPackets.add(Integer.parseInt(serverResponse));
+                            unscrambleMessage.setPackets(numPackets);
+                            int missingPacketsOrigSize = missingPackets.size();
+                            missingPackets = unscrambleMessage.checkPackets();
+                            int missingPacketsAfterSize = missingPackets.size();
+
+                            if (missingPacketsOrigSize - missingPacketsAfterSize != 1)
+                            {
+                                message.remove(message.size() - 1);
+                                unscrambleMessage.setMessage(message);
+                            }
+
+                            done = true;
+                        } else if (!serverResponse.equals("Done"))
+                        {
+                                message.add(serverResponse);
+                                unscrambleMessage.setMessage(message);
+
+                            done = true;
+                        }
+                        System.out.println("SERVER RESPONDS: \"" + serverResponse + "\"");
+                        if (!missingPackets.isEmpty())
+                        {
+                            missingPackets = unscrambleMessage.checkPackets();
+                            isMissPacketsEmpty = false;
+                            done = true;
+                        }
+                        else
+                        {
+                            missingPackets = unscrambleMessage.checkPackets();
+                            isMissPacketsEmpty = true;
+                            done = true;
+                        }
+                    }
+
                 }
+
             }
-            List<String>missingLetters = new ArrayList<>();
-            while (!missingPackets.isEmpty())
-            {
-                for (int ix = 0; ix < missingPackets.size(); ++ix)
-                {
-                    requestWriter.println(missingPackets.get(ix));
-                }
-                while (!serverResponse.equals("Done"))
-                {
-
-                    requestWriter.println(stdIn.readLine());
-
-                    serverResponse = responseReader.readLine();
-                    boolean isNum = isNumeric(serverResponse);
-                   if (!isNum)
-                   {
-                       missingLetters.add(serverResponse);
-                   }
-                   unscrambleMessage.addMissingPackets(missingLetters, missingPackets);
-                  missingPackets =  unscrambleMessage.checkPackets();
-                }
-
-
-            }
+            String answer = unscrambleMessage.unscramble();
+            System.out.println(answer);
+            requestWriter.println("Done");
         } catch (UnknownHostException e) {
             System.err.println("Don't know about host " + hostName);
             System.exit(1);
@@ -100,7 +129,7 @@ public class SimpleClient {
         }
         try
         {
-            int num = Integer.parseInt(response);
+            Integer.parseInt(response);
         }
         catch (NumberFormatException exc)
         {
